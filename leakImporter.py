@@ -52,8 +52,8 @@ ORANGE = '\033[38;5;208;1m'
 CLEAR = '\033[2K'
 ############################
 # database parameters
-mongo_database = "leakScraperTest"
-mail_providers = ["gmail.com","msn.com","yahoo.com","mail.ru","comcast.net","hotmail.com","outlook.com","live.com"]
+mongo_database = "leakScraper"
+mail_providers = ["msn.com","yahoo.com","mail.ru","comcast.net","hotmail.com","outlook.com","live.com"]
 
 def count_lines(filename, buffsize=1024 * 1024):
     with open(filename, 'rb') as f:
@@ -82,12 +82,12 @@ def importer(filepath, n, total_lines, nb_parsed, nbThreads, leak_id, not_import
                         if domain.lower() not in mail_providers:
                             plain = "".join(s[2:])
                             hashed = s[1]
-                            prefixFirst = prefix[0] if len(prefix) else 0
-                            prefixLen = len(prefix)
-                            plainFirst = plain[0] if len(plain) else 0
-                            plainLen = len(plain)
+                            prefixFirst = prefix[0] if len(prefix) else ""
+                            prefixLen = str(len(prefix))
+                            plainFirst = plain[0] if len(plain) else ""
+                            plainLen = str(len(plain))
 
-                            fd2.write('"' + str(leak_id) + '"' + delimiter + '"' + prefix + '"' + delimiter + '"' + domain + '"' + delimiter + '"' + hashed + '"' + delimiter + '"' + plain + '"' + delimiter + '"' + plainFirst + '"' + delimiter + '"' + plainLen + '"' + + delimiter + '"' + prefixFirst + '"' + delimiter + '"' + prefixLen + '"' "\n")
+                            fd2.write('"' + str(leak_id) + '"' + delimiter + '"' + prefix + '"' + delimiter + '"' + domain + '"' + delimiter + '"' + hashed + '"' + delimiter + '"' + plain + '"' + delimiter + '"' + plainFirst + '"' + delimiter + '"' + plainLen + '"' +  delimiter + '"' + prefixFirst + '"' + delimiter + '"' + prefixLen + '"' + "\n")
                             nb += 1
                         else:
                             nb_mail_providers["nb_mail_providers"] += 1
