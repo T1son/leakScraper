@@ -17,6 +17,8 @@ def index():
     max_pages = 20
     if request.query.search:
         query = request.query.search
+        if "@" in request.query.search:
+            query = request.query.search.split("@")[0]     
         page = request.query.page if request.query.page else 1
         step = request.query.step if request.query.step else default_step
         numPage = request.query.numPage if request.query.numPage else 1
@@ -35,8 +37,8 @@ def index():
             numPage = 1
         start = max(0, (page - 1) * step)
         # end = start + step
-        creds = [document for document in credentials.find({"d": query}).skip(start).limit(step)]
-        nbRes = credentials.find({"d": query}).skip(((int(numPage) - 1) * max_pages * step)).limit(max_pages * step).count(with_limit_and_skip=True)
+        creds = [document for document in credentials.find({"$or":[{"d": query},{"p": query}]}).skip(start).limit(step)]
+        nbRes = credentials.find({"$or":[{"d": query},{"p": query}]}).skip(((int(numPage) - 1) * max_pages * step)).limit(max_pages * step).count(with_limit_and_skip=True)
         nbPages = int(math.ceil(nbRes / step))
         page = max(1, min(((numPage - 1) * max_pages) + nbPages, page))
         if request.query.page and int(request.query.page) > page:
@@ -134,4 +136,4 @@ def js(filepath):
     return static_file(filepath, root="./views/js")
 
 
-run(host="127.0.0.1", port=8080, debug=False, reloader=False)
+run(host="0.0.0.0", port=8080, debug=False, reloader=False)

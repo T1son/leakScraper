@@ -60,18 +60,18 @@
 	      	  	<a class="btn btn-primary" href="/export?search={{query}}&what=cracked" role="button">Cracked</a>
 	      	  </p>
 		      <table class="table-striped table table-hover">
-				<tr>
-					<th><label>Email <input id="chk_email" type="checkbox" unchecked onclick="switchsafemode('email');"/></label></th>
-					<th><label>Hash <input id="chk_hash" type="checkbox" unchecked onclick="switchsafemode('hash');"/></label></th>
-					<th><label>Plain <input id="chk_plain" type="checkbox" unchecked onclick="switchsafemode('plain');"/></label></th>
-				</tr>
-				% for c in creds :
-				<tr>
-					<td><span class="email">{{c["p"]}}</span>@{{c["d"]}}</td>
-					<td><span class="hash">{{c["h"]}}</span></td>
-					<td><span class="plain">{{c["P"]}}</span></td>
-				</tr>
-				% end
+			<tr>
+				<th>Mail</th>
+				<th>Hash</th>
+				<th>Password</th>
+			</tr>
+			% for c in creds :
+			<tr>
+				<td>{{c["p"]}}@{{c["d"]}}</td>
+				<td>{{c["h"]}}</td>
+				<td>{{c["P"]}}</td>
+			</tr>
+			% end
 			</table>
 		% end
 % include("footer")
