@@ -78,10 +78,16 @@ def importer(filepath, n, total_lines, nb_parsed, nbThreads, leak_id, not_import
                         em = s[0].split("@")
                         prefix = em[0]
                         domain = em[1]
+
                         if domain.lower() not in mail_providers:
                             plain = "".join(s[2:])
                             hashed = s[1]
-                            fd2.write('"' + str(leak_id) + '"' + delimiter + '"' + prefix + '"' + delimiter + '"' + domain + '"' + delimiter + '"' + hashed + '"' + delimiter + '"' + plain + '"'+"\n")
+                            prefixFirst = prefix[0] if len(prefix) else 0
+                            prefixLen = len(prefix)
+                            plainFirst = plain[0] if len(plain) else 0
+                            plainLen = len(plain)
+
+                            fd2.write('"' + str(leak_id) + '"' + delimiter + '"' + prefix + '"' + delimiter + '"' + domain + '"' + delimiter + '"' + hashed + '"' + delimiter + '"' + plain + '"' + delimiter + '"' + plainFirst + '"' + delimiter + '"' + plainLen + '"' + + delimiter + '"' + prefixFirst + '"' + delimiter + '"' + prefixLen + '"' "\n")
                             nb += 1
                         else:
                             nb_mail_providers["nb_mail_providers"] += 1
@@ -98,7 +104,7 @@ def importer(filepath, n, total_lines, nb_parsed, nbThreads, leak_id, not_import
             nb_parsed[n] = nb
             nb_err[n] = errs
     fd2.close()
-    cmd = ["mongoimport","-d",mongo_database,"-c","credentials","--type","csv","--file",filename,"--fields","l,p,d,h,P", "--numInsertionWorkers","8"]
+    cmd = ["mongoimport","-d",mongo_database,"-c","credentials","--type","csv","--file",filename,"--fields","l,p,d,h,P,plainFirst,plainLen,prefixFirst,prefixLen", "--numInsertionWorkers","8"]
     proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     proc.wait()
     e.set()
