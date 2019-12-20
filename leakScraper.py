@@ -37,8 +37,12 @@ def index():
             numPage = 1
         start = max(0, (page - 1) * step)
         # end = start + step
-        creds = [document for document in credentials.find({"$or":[{"d": query},{"p": query}]}).skip(start).limit(step)]
-        nbRes = credentials.find({"$or":[{"d": query},{"p": query}]}).skip(((int(numPage) - 1) * max_pages * step)).limit(max_pages * step).count(with_limit_and_skip=True)
+        prefixFirst = prefix[0] if len(prefix) else ""
+        prefixLen = str(len(prefix))
+        #plainFirst = plain[0] if len(plain) else ""
+        #plainLen = str(len(plain))
+        creds = [document for document in credentials.find({"$or":[{"d": query}, {"$and":[{"prefixFirst": prefixFirst }, {"prefixLen": prefixLen}, {"p": query}]} ]}).skip(start).limit(step)]
+        nbRes = credentials.find({"$or":[{"d": query}, {"$and":[{"prefixFirst": prefixFirst }, {"prefixLen": prefixLen}, {"p": query}]} ]}).skip(((int(numPage) - 1) * max_pages * step)).limit(max_pages * step).count(with_limit_and_skip=True)
         nbPages = int(math.ceil(nbRes / step))
         page = max(1, min(((numPage - 1) * max_pages) + nbPages, page))
         if request.query.page and int(request.query.page) > page:
