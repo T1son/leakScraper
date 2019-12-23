@@ -9,6 +9,7 @@ import uuid
 import sys
 import os
 import re
+import csv
 
 '''
    __            _     _____                            _
@@ -69,40 +70,43 @@ def importer(filepath, n, total_lines, nb_parsed, nbThreads, leak_id, not_import
         errs = 0
         nb = 0
         filename = "/tmp/tmp_" + str(uuid.uuid4())
-        fd2 = open(filename, "w")
-        while i < total_lines:
-            if line:
-                try:
-                    s = line.strip().replace('"', '""').split(":")
-                    if len(s) >= 3:
-                        em = s[0].split("@")
-                        prefix = em[0]
-                        domain = em[1]
+        #fd2 = open(filename, "w")
+        with open(filename, 'w', newline='') as csvfile:
+            spamwriter = csv.writer(csvfile, delimiter=delimiter, quotechar='|', quoting=csv.QUOTE_MINIMAL)
+            while i < total_lines:
+                if line:
+                    try:
+                        s = line.strip().replace('"', '""').split(":")
+                        if len(s) >= 3:
+                            em = s[0].split("@")
+                            prefix = em[0]
+                            domain = em[1]
 
-                        if domain.lower() not in mail_providers:
-                            plain = "".join(s[2:])
-                            hashed = s[1]
-                            prefixFirst = prefix[0] if len(prefix) else ""
-                            prefixLen = str(len(prefix))
-                            plainFirst = plain[0] if len(plain) else ""
-                            plainLen = str(len(plain))
+                            if domain.lower() not in mail_providers:
+                                plain = "".join(s[2:])
+                                hashed = s[1]
+                                prefixFirst = prefix[0] if len(prefix) else ""
+                                prefixLen = str(len(prefix))
+                                plainFirst = plain[0] if len(plain) else ""
+                                plainLen = str(len(plain))
 
-                            fd2.write('"' + str(leak_id) + '"' + delimiter + '"' + prefix + '"' + delimiter + '"' + domain + '"' + delimiter + '"' + hashed + '"' + delimiter + '"' + plain + '"' + delimiter + '"' + plainFirst + '"' + delimiter + '"' + plainLen + '"' +  delimiter + '"' + prefixFirst + '"' + delimiter + '"' + prefixLen + '"' + "\n")
-                            nb += 1
+                                spamwriter.writerow([str(leak_id), prefix, domain, hashed, plain, plainFirst, plainLen, prefixFirst, prefixLen])
+                                #fd2.write('"' + str(leak_id) + '"' + delimiter + '"' + prefix + '"' + delimiter + '"' + domain + '"' + delimiter + '"' + hashed + '"' + delimiter + '"' + plain + '"' + delimiter + '"' + plainFirst + '"' + delimiter + '"' + plainLen + '"' +  delimiter + '"' + prefixFirst + '"' + delimiter + '"' + prefixLen + '"' + "\n")
+                                nb += 1
+                            else:
+                                nb_mail_providers["nb_mail_providers"] += 1
                         else:
-                            nb_mail_providers["nb_mail_providers"] += 1
-                    else:
-                        raise Exception("An attribute is missing")
-                except Exception as ex:
-                    print(line, ":", ex)
-                    not_imported[1].acquire()
-                    not_imported[0].write(line)
-                    not_imported[1].release()
-                    errs += 1
-            line = [fd.readline() for _ in range(nbThreads)][n - 1]
-            i += nbThreads
-            nb_parsed[n] = nb
-            nb_err[n] = errs
+                            raise Exception("An attribute is missing")
+                    except Exception as ex:
+                        print(line, ":", ex)
+                        not_imported[1].acquire()
+                        not_imported[0].write(line)
+                        not_imported[1].release()
+                        errs += 1
+                line = [fd.readline() for _ in range(nbThreads)][n - 1]
+                i += nbThreads
+                nb_parsed[n] = nb
+                nb_err[n] = errs
     fd2.close()
     cmd = ["mongoimport","-d",mongo_database,"-c","credentials","--type","csv","--file",filename,"--fields","l,p,d,h,P,plainFirst,plainLen,prefixFirst,prefixLen", "--numInsertionWorkers","8"]
     proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
