@@ -54,7 +54,8 @@ CLEAR = '\033[2K'
 ############################
 # database parameters
 mongo_database = "leakScraper"
-mail_providers = ["msn.com","yahoo.com","mail.ru","comcast.net","hotmail.com","outlook.com","live.com"]
+#mail_providers = ["msn.com","yahoo.com","mail.ru","comcast.net","hotmail.com","outlook.com","live.com"]
+mail_providers = []
 
 def count_lines(filename, buffsize=1024 * 1024):
     with open(filename, 'rb') as f:
@@ -72,7 +73,7 @@ def importer(filepath, n, total_lines, nb_parsed, nbThreads, leak_id, not_import
         filename = "/tmp/tmp_" + str(uuid.uuid4())
         #fd2 = open(filename, "w")
         with open(filename, 'w', newline='') as csvfile:
-            spamwriter = csv.writer(csvfile, delimiter=delimiter, quotechar='|', quoting=csv.QUOTE_MINIMAL)
+            spamwriter = csv.writer(csvfile, delimiter=delimiter, quotechar='"', quoting=csv.QUOTE_ALL)
             while i < total_lines:
                 if line:
                     try:
@@ -107,7 +108,7 @@ def importer(filepath, n, total_lines, nb_parsed, nbThreads, leak_id, not_import
                 i += nbThreads
                 nb_parsed[n] = nb
                 nb_err[n] = errs
-    fd2.close()
+#    fd2.close()
     cmd = ["mongoimport","-d",mongo_database,"-c","credentials","--type","csv","--file",filename,"--fields","l,p,d,h,P,plainFirst,plainLen,prefixFirst,prefixLen", "--numInsertionWorkers","8"]
     proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     proc.wait()
